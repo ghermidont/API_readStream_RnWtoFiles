@@ -1,50 +1,74 @@
-import java.io.IOException;
-//import java.net.MalformedURLException;
+import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
-
-//import static java.lang.System.*;
-
-// All the string inside "" are objects that have own methods.
 
 public class AppStream1 {
 
-    public static void main(String[] args) {
-// HW 1) display the result : COUNTRY "United States".
-        final String ADDRESS = "http://ip-api.com/scv"; //// Data source. Java will se this as a file.
-        String ip;
-        Scanner keyboard = new Scanner(System.in);
-        System.out.println("Enter IP: ");
-        ip = keyboard.next();
+    public static void main(String[] args) throws IOException {
 
+        //vars declaration and initialization
+        final String ADDRESS = "http://ip-api.com/csv";
         URL u;
+        String ip;
+        String ipFromList;
+        String countryFromFile;
+        BufferedReader brCountry = new BufferedReader(new FileReader("COUNTRY.txt"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("COUNTRY.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("IP.txt"));
 
+        //Initialize the "ipList" ArrayList
+        ArrayList<String> ipList = new ArrayList<>();
+
+        // Read from IP.txt file.
         try {
 
-            u = new URL(ADDRESS + "/" + ip);
-            Scanner in  = new Scanner(u.openStream());
-            String data = in.nextLine();
-
-            int commas = 0;
-
-            for(int index = 0; index < data.length(); index++){
-                if (data.charAt(index) == ','){
-                    commas++;
-                }
-                if(commas==1) {
-                    System.out.println(data.charAt(index));
-                }
+            //Add content to the "ipList" ArrayList
+            while ((ip = br.readLine()) != null) {
+                ipList.add(ip);
             }
 
-        } catch (IOException e) {
+            // Extract IPs from ipList ArrayList.
+            for (int n = 0; n < ipList.size(); n++) {
+                ipFromList = ipList.get(n);
 
-            e.printStackTrace();
+                u = new URL(ADDRESS + "/" + ipFromList);
+
+                // Read from stream
+                Scanner in = new Scanner(u.openStream());
+                String data = in.nextLine();
+
+                //Content to write to COUNTRY.txt
+                bw.write("IP: " + ipFromList + " is from ");
+
+                int commas = 0;
+                for (int index = 0; index < data.length(); index++) {
+                    if (data.charAt(index) == ',') {
+                        commas++;
+                    }
+                    if (commas == 1 && data.charAt(index) != ',') {
+                        bw.write(data.charAt(index));
+                    }
+                }
+
+                bw.write("\n");
+
+            }
+
+            bw.close();
+
+            // Read from COUNTRY.txt
+            while ((countryFromFile = brCountry.readLine()) != null) {
+                System.out.println(countryFromFile);
+            }
+
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
 
 
-    }
 
-}
+
 
 //HW JSON/XML
 //github.com/toddmotto/public-apis
@@ -69,3 +93,6 @@ public class AppStream1 {
             System.out.println( "COST: 75 lei");
         }
         */
+
+    }
+}
